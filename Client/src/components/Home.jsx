@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion as Motion } from "framer-motion";
 import { Briefcase, Users, CalendarCheck, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -46,14 +47,14 @@ const Home = () => {
       </header>
 
       <section className="flex flex-col items-center text-center mt-20 px-6">
-        <motion.h1
+        <Motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-4xl md:text-5xl font-bold mb-4 text-white"
         >
           Empower Your Workforce with <span className="text-blue-500">HRM Portal</span>
-        </motion.h1>
+        </Motion.h1>
         <p className="text-slate-400 max-w-2xl mb-8">
           A smart Human Resource Management platform designed to simplify attendance tracking,
           leave management, employee records, and communication across teams.
@@ -70,7 +71,7 @@ const Home = () => {
       {/* Feature Section */}
       <section className="mt-20 px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
         {features.map((item, index) => (
-          <motion.div
+          <Motion.div
             key={index}
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -87,7 +88,7 @@ const Home = () => {
                 <p className="text-slate-400 text-center text-sm">{item.desc}</p>
               </CardContent>
             </Card>
-          </motion.div>
+          </Motion.div>
         ))}
       </section>
 
