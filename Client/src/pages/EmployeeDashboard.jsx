@@ -1,21 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { CalendarDays, LogOut, Sparkles } from "lucide-react";
 import Announcements from "@/components/employee/Announcements";
 import LeaveApply from "@/components/employee/LeaveApply";
 import LeaveList from "@/components/employee/LeaveList";
 import Attendance from "@/components/employee/Attendance";
 import { getMyLeaves } from "@/api/api";
 
+const tabs = [
+  { id: "announcements", label: "Overview" },
+  { id: "leaves", label: "Time off" },
+  { id: "attendance", label: "Attendance" },
+  { id: "profile", label: "My profile" },
+];
+
 const EmployeeDashboard = () => {
   const [activeTab, setActiveTab] = useState("announcements");
   const [leaves, setLeaves] = useState([]);
-  const [user] = useState(
-    () => JSON.parse(localStorage.getItem("user")) || { name: "John Doe", email: "johndoe@email.com" }
-  );
+  const [user] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user")) || { name: "there", email: "" };
+    } catch {
+      return { name: "there", email: "" };
+    }
+  });
 
-  
   const handleLogout = () => {
-    localStorage.removeItem("token"); 
-    window.location.href = "/login"; 
+    localStorage.removeItem("token");
+    window.location.href = "/login";
   };
 
   const fetchLeaves = async () => {
@@ -28,14 +39,8 @@ const EmployeeDashboard = () => {
   };
 
   useEffect(() => {
-    if (activeTab === "leaves") {
-      fetchLeaves();
-    }
+    if (activeTab === "leaves") fetchLeaves();
   }, [activeTab]);
-
-  const handleLeaveApplied = () => {
-    fetchLeaves();
-  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -44,7 +49,7 @@ const EmployeeDashboard = () => {
       case "leaves":
         return (
           <div className="space-y-6">
-            <LeaveApply onApplied={handleLeaveApplied} />
+            <LeaveApply onApplied={fetchLeaves} />
             <LeaveList leaves={leaves} />
           </div>
         );
@@ -52,14 +57,15 @@ const EmployeeDashboard = () => {
         return <Attendance />;
       case "profile":
         return (
-          <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 shadow-lg">
-            <h2 className="text-lg font-semibold text-white mb-3">My Profile</h2>
-            <div className="space-y-2 text-slate-300">
-              <p><span className="text-slate-400">Name:</span> {user.name}</p>
-              <p><span className="text-slate-400">Email:</span> {user.email}</p>
-              <p><span className="text-slate-400">Role:</span> Employee</p>
+          <section className="profile-card">
+            <div className="profile-avatar">{user.name?.charAt(0)?.toUpperCase() || "U"}</div>
+            <div>
+              <span className="eyebrow">YOUR ACCOUNT</span>
+              <h2>{user.name}</h2>
+              <p>{user.email}</p>
+              <span className="role-pill">Employee</span>
             </div>
-          </div>
+          </section>
         );
       default:
         return null;
@@ -67,44 +73,43 @@ const EmployeeDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
-      
-      <nav className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center shadow-md">
-        <h1 className="text-xl font-semibold text-white tracking-wide">Employee Portal</h1>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={handleLogout}
-            className="bg-rose-600 hover:bg-rose-700 transition-colors text-white px-4 py-2 rounded-lg text-sm font-medium"
-          >
-            Logout
-          </button>
+    <div className="dashboard-page">
+      <header className="dashboard-topbar">
+        <a className="dashboard-brand" href="/">
+          <span className="brand-mark"><Sparkles size={17} /></span>
+          <span>StaffSync <small>PEOPLE WORKSPACE</small></span>
+        </a>
+        <div className="topbar-actions">
+          <span className="today-label"><CalendarDays size={16} /> {new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</span>
+          <span className="user-avatar">{user.name?.charAt(0)?.toUpperCase() || "U"}</span>
+          <button className="button button-quiet logout-button" onClick={handleLogout}><LogOut size={16} /> Log out</button>
         </div>
-      </nav>
+      </header>
 
-      <div className="px-6 py-8 max-w-6xl mx-auto">
-        <div className="flex space-x-3 border-b border-slate-700 mb-6 overflow-x-auto">
-          {[
-            { id: "announcements", label: "Announcements" },
-            { id: "leaves", label: "Leaves" },
-            { id: "attendance", label: "Attendance" },
-            { id: "profile", label: "Profile" },
-          ].map((tab) => (
+      <main className="dashboard-content">
+        <section className="dashboard-welcome">
+          <div>
+            <span className="eyebrow">EMPLOYEE WORKSPACE</span>
+            <h1>Good to see you, {user.name?.split(" ")[0] || "there"} <span>✦</span></h1>
+            <p>Here&apos;s what&apos;s happening with your workday.</p>
+          </div>
+          <div className="welcome-date"><CalendarDays size={17} /><span>{new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</span></div>
+        </section>
+
+        <nav className="dashboard-tabs" aria-label="Employee sections">
+          {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors duration-200 ${
-                activeTab === tab.id
-                  ? "bg-slate-800 text-white border-b-2 border-rose-500"
-                  : "text-slate-400 hover:text-white"
-              }`}
+              className={`dashboard-tab ${activeTab === tab.id ? "active" : ""}`}
+              aria-current={activeTab === tab.id ? "page" : undefined}
             >
               {tab.label}
             </button>
           ))}
-        </div>
-
-        <div className="mt-4">{renderContent()}</div>
-      </div>
+        </nav>
+        <section className="dashboard-panel">{renderContent()}</section>
+      </main>
     </div>
   );
 };

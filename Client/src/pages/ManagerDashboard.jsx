@@ -1,12 +1,22 @@
 import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { CalendarDays, LogOut, Sparkles } from "lucide-react";
 import LeaveApplications from "@/components/manager/LeaveApplications";
 import TrainingManagement from "@/components/manager/TrainingManagement";
 
+const tabs = [
+  { id: "leave", label: "Leave requests" },
+  { id: "training", label: "Learning & development" },
+];
+
 const ManagerDashboard = () => {
   const [activeTab, setActiveTab] = useState("leave");
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user")) || {};
+    } catch {
+      return {};
+    }
+  })();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -14,59 +24,38 @@ const ManagerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col">
-      <nav className="w-full bg-slate-800/70 border-b border-slate-700 backdrop-blur-md flex items-center justify-between px-6 py-4 shadow-md">
-        <h1 className="text-2xl font-semibold text-white tracking-wide">
-          Manager Dashboard
-        </h1>
-        <Button
-          onClick={handleLogout}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-        >
-          Logout
-        </Button>
-      </nav>
-
-      <div className="flex justify-center items-start flex-1 p-6">
-        <Card className="w-full max-w-6xl bg-slate-800/60 border border-slate-700 shadow-2xl backdrop-blur-md mt-4">
-          <CardHeader>
-            <CardTitle className="text-2xl font-semibold text-white text-center">
-              Welcome Back, Manager
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full mt-4"
-            >
-              <TabsList className="grid grid-cols-2 bg-slate-700/50 rounded-lg">
-                <TabsTrigger
-                  value="leave"
-                  className="text-white data-[state=active]:bg-blue-600"
-                >
-                  Leave Applications
-                </TabsTrigger>
-                <TabsTrigger
-                  value="training"
-                  className="text-white data-[state=active]:bg-green-600"
-                >
-                  Training & Development
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="leave" className="mt-6">
-                <LeaveApplications />
-              </TabsContent>
-
-              <TabsContent value="training" className="mt-6">
-                <TrainingManagement />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
+    <div className="dashboard-page">
+      <header className="dashboard-topbar">
+        <a className="dashboard-brand" href="/">
+          <span className="brand-mark"><Sparkles size={17} /></span>
+          <span>StaffSync <small>PEOPLE WORKSPACE</small></span>
+        </a>
+        <div className="topbar-actions">
+          <span className="today-label"><CalendarDays size={16} /> {new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</span>
+          <span className="user-avatar">{user.name?.charAt(0)?.toUpperCase() || "M"}</span>
+          <button className="button button-quiet logout-button" onClick={handleLogout}><LogOut size={16} /> Log out</button>
+        </div>
+      </header>
+      <main className="dashboard-content">
+        <section className="dashboard-welcome">
+          <div>
+            <span className="eyebrow">MANAGER WORKSPACE</span>
+            <h1>Lead your team forward.</h1>
+            <p>Welcome back{user.name ? `, ${user.name.split(" ")[0]}` : ""}. Keep your team moving and growing.</p>
+          </div>
+          <div className="welcome-date"><CalendarDays size={17} /><span>{new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</span></div>
+        </section>
+        <nav className="dashboard-tabs" aria-label="Manager sections">
+          {tabs.map((tab) => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`dashboard-tab ${activeTab === tab.id ? "active" : ""}`} aria-current={activeTab === tab.id ? "page" : undefined}>
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+        <section className="dashboard-panel">
+          {activeTab === "leave" ? <LeaveApplications /> : <TrainingManagement />}
+        </section>
+      </main>
     </div>
   );
 };
